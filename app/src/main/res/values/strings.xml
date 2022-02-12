@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AS_CONNECT</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="otp_text"><font color="#ffffff">Please type the one time password sent to </font></string>
+</resources>

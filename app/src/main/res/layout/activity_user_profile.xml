@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UserProfile"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:padding="20dp"
+        android:background="#fece2f">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+
+            android:id="@+id/profile_img"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/thinking_face"
+            app:civ_border_width="2dp" />
+
+        <TextView
+            android:id="@+id/full_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@+id/profile_img"
+            android:fontFamily="@font/bungee"
+            android:text="Aryandeep Shukla"
+            android:textSize="20sp" />
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/profile_img"
+            android:layout_below="@+id/full_name"
+            android:layout_marginStart="10dp"
+            android:includeFontPadding="false"
+            android:text="MrFreak76"
+            android:textSize="14sp"/>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+
+    </LinearLayout>
+
+</LinearLayout>
