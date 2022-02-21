@@ -3,6 +3,7 @@ package com.example.myapplication.Intro
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -28,13 +29,14 @@ class IntroFragment : Fragment() {
     ): View? {
 
         //popin animation for as_meet logo
-        Handler().postDelayed({
+        Handler(Looper.myLooper()!!).postDelayed({
             app_name.visibility = View.VISIBLE
             popIn = AnimationUtils.loadAnimation(context, R.anim.pop_in)
             app_name.startAnimation(popIn)
         },800)
+
         //animations for navigation of splash screen to viewpager
-        Handler().postDelayed({
+        Handler(Looper.myLooper()!!).postDelayed({
             topAnim = AnimationUtils.loadAnimation(context, R.anim.top_anime)
             bottomAnim = AnimationUtils.loadAnimation(context, R.anim.bottom_anime)
             logoAnim = AnimationUtils.loadAnimation(context, R.anim.fade_out_anime)
@@ -45,14 +47,13 @@ class IntroFragment : Fragment() {
         },2500)
 
         //navigating
-        Handler().postDelayed({
+        Handler(Looper.myLooper()!!).postDelayed({
             if (onBoardingFinished()){
                 findNavController().navigate(R.id.action_introFragment_to_loginRegisterActivity)
             }else{
                 findNavController().navigate(R.id.action_introFragment_to_viewPagerFragment)
             }
         },3500)
-
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_intro, container, false)

@@ -4,24 +4,30 @@
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
-        android:hardwareAccelerated="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <activity
-            android:name=".UserProfile"
+            android:name=".home.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".Tabs.VerifyActivity"
+            android:name=".LoginRegister.RegisterDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".home.UserProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginRegister.VerifyActivity"
             android:exported="false" />
         <activity
             android:name=".HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".Tabs.LoginRegisterActivity"
+            android:name=".LoginRegister.LoginRegisterActivity"
             android:exported="false" />
         <activity
             android:name=".Intro.MainActivity"

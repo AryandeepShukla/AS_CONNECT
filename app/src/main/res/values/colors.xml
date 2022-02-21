@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="opaque_80_percent">#80FFFFFF</color>
     <color name="prime_col">#0a0837</color>
     <color name="yellow">#FFFF00</color>
     <color name="fuchsia">#FF00FF</color>
@@ -10,6 +11,8 @@
     <color name="maroon">#800000</color>
     <color name="aqua">#00FFFF</color>
     <color name="lime">#00FF00</color>
+    <color name="deepRed">#C8631313</color>
+    <color name="deepYellow">#fece2f</color>
     <color name="teal_200">#008080</color>
     <color name="teal_700">#008082</color>
     <color name="green">#008000</color>

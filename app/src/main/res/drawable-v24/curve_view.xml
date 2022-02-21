@@ -5,7 +5,7 @@
     <solid android:color="@color/prime_col"/>
 
     <corners
-        android:bottomLeftRadius="40dp"
-        android:bottomRightRadius="40dp"/>
+        android:topLeftRadius="40dp"
+        android:topRightRadius="40dp"/>
 
 </shape>

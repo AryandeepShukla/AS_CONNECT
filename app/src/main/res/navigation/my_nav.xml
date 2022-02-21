@@ -29,12 +29,11 @@
         <action
             android:id="@+id/action_viewPagerFragment_to_loginRegisterActivity"
             app:destination="@id/loginRegisterActivity"
-            app:popUpTo="@id/viewPagerFragment"
-            app:popUpToInclusive="true" />
+            app:popUpTo="@id/viewPagerFragment" />
     </fragment>
     <activity
         android:id="@+id/loginRegisterActivity"
-        android:name="com.example.myapplication.Tabs.LoginRegisterActivity"
+        android:name="com.example.myapplication.LoginRegister.LoginRegisterActivity"
         android:label="activity_login_register"
         tools:layout="@layout/activity_login_register" />
 </navigation>
