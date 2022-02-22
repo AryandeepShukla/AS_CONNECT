@@ -24,9 +24,6 @@
             android:name=".LoginRegister.VerifyActivity"
             android:exported="false" />
         <activity
-            android:name=".HomeActivity"
-            android:exported="false" />
-        <activity
             android:name=".LoginRegister.LoginRegisterActivity"
             android:exported="false" />
         <activity

@@ -25,16 +25,15 @@ class HomeActivity : AppCompatActivity() {
     lateinit var currentUser: FirebaseUser
     lateinit var databaseRef: FirebaseDatabase
     var phone: String? = null
+    var country: String? = null
 
     lateinit var logout: ImageView
     lateinit var profile: ImageView
-    lateinit var loadingDialog: LoadingDialog
+    private var loadingDialog: LoadingDialog = LoadingDialog(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-
-        loadingDialog = LoadingDialog(this)
 
         //auth user
         mAuth = FirebaseAuth.getInstance()
@@ -42,7 +41,13 @@ class HomeActivity : AppCompatActivity() {
         phone = mAuth.currentUser!!.phoneNumber.toString()
         databaseRef = FirebaseDatabase.getInstance()
 
+        //check if user is registered or not
         getIfRegistered()
+        loadingDialog.dismissDialog()
+
+        if (intent!=null){
+            country = intent.getStringExtra("country")
+        }
 
         logout = findViewById(R.id.logoutHome)
         profile = findViewById(R.id.profile)
@@ -95,20 +100,24 @@ class HomeActivity : AppCompatActivity() {
         }.create().show()
     }
 
+
     private fun getIfRegistered(){
         loadingDialog.startDialog()
         var isRegistered: Boolean = false
         val ref = databaseRef.reference.child("profile")
         ref.child(currentUser.phoneNumber.toString()).get().addOnSuccessListener {
             if (it.exists()) {
+                loadingDialog.dismissDialog()
                 isRegistered = it.child("registered").value.toString().toBoolean()
+            } else {
+                loadingDialog.dismissDialog()
+                isRegistered =false
             }
-            else {
-                isRegistered = false
-            }
-            loadingDialog.dismissDialog()
             if (!isRegistered){
-                startActivity(Intent(this@HomeActivity, RegisterDetailsActivity::class.java))
+                loadingDialog.dismissDialog()
+                val intent = Intent(this@HomeActivity, RegisterDetailsActivity::class.java)
+                intent.putExtra("country", country)
+                startActivity(intent)
                 finish()
             }
         }

@@ -11,68 +11,89 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_register"
         android:orientation="vertical"
-        android:padding="2dp"
-        android:background="@drawable/bg_register">
+        android:padding="2dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/backIV"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentStart="true"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_arrow" />
-
-            </RelativeLayout>
-
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/backIV"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_margin="5dp"
+            android:padding="5dp"
+            android:src="@drawable/ic_arrow" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:text="Create"
-                android:textColor="@color/white"
-                android:textSize="30sp"
-                android:textStyle="normal" />
+                android:layout_marginBottom="5dp"
+                android:layout_weight="2"
+                android:orientation="vertical"
+                android:padding="10dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:text="Profile"
-                android:textColor="@color/white"
-                android:textSize="33sp"
-                android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:text="Create"
+                    android:textColor="@color/white"
+                    android:textSize="30sp"
+                    android:textStyle="normal" />
 
-            <TextView
-                android:id="@+id/phoneNo"
-                android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:text="Profile"
+                    android:textColor="@color/white"
+                    android:textSize="33sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/phoneNo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="20dp"
+                    android:padding="5dp"
+                    android:text="+91 000000 00000"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="20dp"
-                android:text="+91 000000 00000"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:padding="5dp"/>
+                android:layout_marginHorizontal="20dp"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imageUpload"
+                    android:layout_width="98dp"
+                    android:layout_height="98dp"
+                    android:src="@drawable/ic_baseline_add_photo_alternate_24"
+                    app:shapeAppearanceOverlay="@style/Circular" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/imageUploadButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/button_red"
+                    android:text="Select Profile"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>

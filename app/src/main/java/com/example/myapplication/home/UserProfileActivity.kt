@@ -1,6 +1,9 @@
 package com.example.myapplication.home
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageView
@@ -17,6 +20,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import java.io.File
 
 class UserProfileActivity : AppCompatActivity() {
 
@@ -24,6 +30,9 @@ class UserProfileActivity : AppCompatActivity() {
     lateinit var mAuth: FirebaseAuth
     lateinit var currentUser: FirebaseUser
     lateinit var databaseRef: FirebaseDatabase
+    lateinit var storage: FirebaseStorage
+    lateinit var storageReference: StorageReference
+    private lateinit var imageUri: Uri
 
     //top views
     lateinit var home: ImageView
@@ -38,11 +47,13 @@ class UserProfileActivity : AppCompatActivity() {
     lateinit var email: TextView
     lateinit var countryZipCode: TextView
     lateinit var address: TextView
+    lateinit var profilePic: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_profile)
 
+        profilePic = findViewById(R.id.imageProfile)
         pno = findViewById(R.id.phoneProfile)
         name = findViewById(R.id.nameProfile)
         username = findViewById(R.id.usernameProfile)
@@ -57,24 +68,27 @@ class UserProfileActivity : AppCompatActivity() {
         currentUser = mAuth.currentUser!!
         phone = mAuth.currentUser!!.phoneNumber.toString()
 
+        storage = FirebaseStorage.getInstance()
+        storageReference = storage.reference.child("images/${currentUser.phoneNumber.toString()}")
+        setProfilePic()
+
         //database for profile
         databaseRef = FirebaseDatabase.getInstance()
-        loadingDialog.startDialog()
         val ref = databaseRef.reference.child("profile")
 
         //fetching from realtime database
+        loadingDialog.startDialog()
         val tableRef = ref.child(currentUser.phoneNumber.toString())
         tableRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
+                loadingDialog.dismissDialog()
                 Toast.makeText(
                     this@UserProfileActivity,
                     "Error occurred while fetching the details! ",
                     Toast.LENGTH_LONG
                 ).show()
             }
-
             override fun onDataChange(snapshot: DataSnapshot) {
-
                 //showing details in user profile
                 val spacedPhone = phone.substring(0, 3) + " " + phone.substring(3)
                 pno.text = spacedPhone
@@ -88,11 +102,12 @@ class UserProfileActivity : AppCompatActivity() {
                 email.text = snapshot.child("email").value.toString()
 
                 val countryPlusCode =
-                    snapshot.child("country").value.toString()  + " (" + snapshot.child("zip_code").value.toString() +")"
+                    snapshot.child("country").value.toString() + " (" + snapshot.child("zip_code").value.toString() + ")"
                 countryZipCode.text = countryPlusCode
 
                 address.text = snapshot.child("address").value.toString()
                 loadingDialog.dismissDialog()
+
             }
         })
 
@@ -101,13 +116,30 @@ class UserProfileActivity : AppCompatActivity() {
         logout = findViewById(R.id.logoutProfile)
 
         home.setOnClickListener {
-            startActivity(Intent(this@UserProfileActivity,HomeActivity::class.java))
+            startActivity(Intent(this@UserProfileActivity, HomeActivity::class.java))
             finish()
         }
         logout.setOnClickListener {
             logout()
         }
 
+    }
+
+    private fun setProfilePic() {
+        loadingDialog.startDialog()
+        val localFile = File.createTempFile("tempFile", ".jpg");
+
+        storageReference.getFile(localFile).addOnSuccessListener {
+            val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
+            profilePic.setImageBitmap(bitmap)
+        }.addOnFailureListener {
+            Toast.makeText(
+                this@UserProfileActivity,
+                "Error occurred while fetching the profile picture! ",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        loadingDialog.dismissDialog()
     }
 
     fun logout() {

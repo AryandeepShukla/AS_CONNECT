@@ -1,17 +1,29 @@
 package com.example.myapplication.LoginRegister
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.LoadingDialog
 import com.example.myapplication.R
 import com.example.myapplication.home.HomeActivity
+import com.example.myapplication.home.UserProfileActivity
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
-import java.lang.Exception
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import kotlinx.android.synthetic.main.activity_register_details.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+
 
 class RegisterDetailsActivity : AppCompatActivity() {
 
@@ -19,11 +31,15 @@ class RegisterDetailsActivity : AppCompatActivity() {
     lateinit var mAuth : FirebaseAuth
     lateinit var currentUser : FirebaseUser
     lateinit var databaseRef : FirebaseDatabase
-    lateinit var loadingDialog: LoadingDialog
+    lateinit var storage: FirebaseStorage
+    lateinit var storageReference: StorageReference
+    private lateinit var imageUri : Uri
+    private var imageUrl : String? = null
 
     //upper views
     lateinit var phoneNumber : TextView
     lateinit var back : ImageView
+    lateinit var loadingDialog: LoadingDialog
 
     //entries
     lateinit var firstNameET : EditText
@@ -32,7 +48,6 @@ class RegisterDetailsActivity : AppCompatActivity() {
     lateinit var emailET : EditText
     lateinit var zipCodeET : EditText
     lateinit var addressET : EditText
-    lateinit var continueButton : Button
     lateinit var firstName : String
     lateinit var lastName : String
     lateinit var username : String
@@ -40,19 +55,24 @@ class RegisterDetailsActivity : AppCompatActivity() {
     lateinit var zipCode : String
     lateinit var address : String
     lateinit var country : String
-
+    lateinit var image : ImageView
+    lateinit var imgUploadButton : Button
+    lateinit var continueButton : Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_details)
 
         loadingDialog = LoadingDialog(this)
+        country = intent.getStringExtra("country").toString()
 
         //auth user
         mAuth= FirebaseAuth.getInstance()
         currentUser = mAuth.currentUser!!
         //database for profile
         databaseRef = FirebaseDatabase.getInstance()
+        storage = FirebaseStorage.getInstance()
+        storageReference = storage.reference
 
         //upper views
         phoneNumber = findViewById(R.id.phoneNo)
@@ -65,8 +85,9 @@ class RegisterDetailsActivity : AppCompatActivity() {
         emailET = findViewById(R.id.emailEt)
         zipCodeET = findViewById(R.id.zipCodeEt)
         addressET = findViewById(R.id.addressEt)
+        image = findViewById(R.id.imageUpload)
+        imgUploadButton = findViewById(R.id.imageUploadButton)
         continueButton = findViewById(R.id.buttonContinue)
-
 
         //get pno of user
         val pno = currentUser.phoneNumber.toString()
@@ -76,20 +97,59 @@ class RegisterDetailsActivity : AppCompatActivity() {
             onBackPressed()
         }
 
+        imageUploadButton.setOnClickListener {
+            pickFromGallery()
+        }
+
         continueButton.setOnClickListener {
             loadingDialog.startDialog()
             try {
-                registerEntries()
-                Toast.makeText(this, "Successfully Registered!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@RegisterDetailsActivity, HomeActivity::class.java)
+                uploadProfilePic()
+                loadingDialog.dismissDialog()
+                val intent = Intent(this@RegisterDetailsActivity, UserProfileActivity::class.java)
                 startActivity(intent)
-                finish()
+                finishAffinity()
             }
             catch (e:Exception){
+                loadingDialog.dismissDialog()
                 Toast.makeText(this, "Error Occurred : $e", Toast.LENGTH_LONG).show()
             }
-            loadingDialog.dismissDialog()
         }
+    }
+
+    private fun pickFromGallery(){
+        val galleryIntent = Intent()
+        galleryIntent.action = Intent.ACTION_GET_CONTENT
+        galleryIntent.type = "image/*"
+        startActivityForResult(galleryIntent, 100)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == 100 && resultCode == RESULT_OK && data != null){
+            imageUri = data.data!!
+            image.setImageURI(imageUri)
+        }
+    }
+
+    fun uploadProfilePic(){
+        val randomName : String = currentUser.phoneNumber.toString()
+        val riversRef: StorageReference = storageReference.child("images/$randomName")
+        riversRef.putFile(imageUri)
+            .addOnSuccessListener {
+                image.setImageURI(null)
+                // Get a URL to the uploaded content
+                val urlTask : Task<Uri> = it.storage.downloadUrl
+                while (!urlTask.isSuccessful);
+                val downloadUrl : Uri = urlTask.result
+                imageUrl = downloadUrl.toString()
+                Log.e("ImageUrl : ", imageUrl.toString())
+                registerEntries()
+                Log.e("Successfully Registered :", "Done")
+            }
+            .addOnFailureListener {
+                Toast.makeText(this,"Failed to Upload Image : $it",Toast.LENGTH_SHORT).show()
+            }
     }
 
     fun registerEntries(){
@@ -100,13 +160,12 @@ class RegisterDetailsActivity : AppCompatActivity() {
         email = emailET.text.toString()
         zipCode = zipCodeET.text.toString()
         address = addressET.text.toString()
-        country = intent.getStringExtra("country").toString()
 
         //realtime database
         val ref = databaseRef.reference.child("profile")
-
         val tableRef = ref.child(currentUser.phoneNumber.toString())
         tableRef.child("first_name").setValue(firstName)
+        tableRef.child("profile_pic_url").setValue(imageUrl)
         tableRef.child("last_name").setValue(lastName)
         tableRef.child("username").setValue(username)
         tableRef.child("email").setValue(email)
@@ -116,8 +175,8 @@ class RegisterDetailsActivity : AppCompatActivity() {
         tableRef.child("phone").setValue(currentUser.phoneNumber.toString())
         tableRef.child("uid").setValue(mAuth.currentUser?.uid!!)
         tableRef.child("registered").setValue("true")
-
     }
+
 
     fun logout() {
         AlertDialog.Builder(this).apply {
@@ -130,11 +189,11 @@ class RegisterDetailsActivity : AppCompatActivity() {
 
                 // if user press yes, then finish the current activity
                 mAuth.signOut()
+                loadingDialog.dismissDialog()
                 val intent = Intent(this@RegisterDetailsActivity, LoginRegisterActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
                 finish()
-                loadingDialog.dismissDialog()
             }
 
             setNegativeButton("No") { _, _ ->
@@ -149,5 +208,9 @@ class RegisterDetailsActivity : AppCompatActivity() {
         logout()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        loadingDialog.dismissDialog()
+    }
 
 }

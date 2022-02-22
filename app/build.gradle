@@ -54,13 +54,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation "androidx.browser:browser:1.4.0"
     implementation 'com.google.firebase:firebase-appcheck-safetynet:16.0.0-beta04'
-
+    implementation 'com.google.firebase:firebase-storage:20.0.0'
 
     apply plugin: 'com.android.application'
     apply plugin: 'kotlin-android'
     apply plugin: 'kotlin-android-extensions'
 
-    implementation 'com.airbnb.android:lottie:3.4.4'
+    implementation 'com.airbnb.android:lottie:4.2.2'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'com.cuberto:liquid-swipe:1.0.0'
     implementation 'me.relex:circleindicator:2.1.6'
