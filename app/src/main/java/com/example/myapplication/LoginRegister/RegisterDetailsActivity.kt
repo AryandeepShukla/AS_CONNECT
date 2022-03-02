@@ -9,10 +9,14 @@ import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.example.myapplication.LoadingDialog
 import com.example.myapplication.R
 import com.example.myapplication.home.HomeActivity
-import com.example.myapplication.home.UserProfileActivity
+import com.example.myapplication.home.UserFragment
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -20,9 +24,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import kotlinx.android.synthetic.main.activity_register_details.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 class RegisterDetailsActivity : AppCompatActivity() {
@@ -54,17 +55,19 @@ class RegisterDetailsActivity : AppCompatActivity() {
     lateinit var email : String
     lateinit var zipCode : String
     lateinit var address : String
-    lateinit var country : String
+    private var country : String? = null
     lateinit var image : ImageView
     lateinit var imgUploadButton : Button
     lateinit var continueButton : Button
+
+    private var mRequestQueue : RequestQueue? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_details)
 
         loadingDialog = LoadingDialog(this)
-        country = intent.getStringExtra("country").toString()
+        mRequestQueue = Volley.newRequestQueue(this);
 
         //auth user
         mAuth= FirebaseAuth.getInstance()
@@ -105,10 +108,9 @@ class RegisterDetailsActivity : AppCompatActivity() {
             loadingDialog.startDialog()
             try {
                 uploadProfilePic()
-                loadingDialog.dismissDialog()
-                val intent = Intent(this@RegisterDetailsActivity, UserProfileActivity::class.java)
-                startActivity(intent)
-                finishAffinity()
+                Handler(Looper.myLooper()!!).postDelayed({
+                    loadingDialog.dismissDialog()
+                },3000)
             }
             catch (e:Exception){
                 loadingDialog.dismissDialog()
@@ -145,7 +147,6 @@ class RegisterDetailsActivity : AppCompatActivity() {
                 imageUrl = downloadUrl.toString()
                 Log.e("ImageUrl : ", imageUrl.toString())
                 registerEntries()
-                Log.e("Successfully Registered :", "Done")
             }
             .addOnFailureListener {
                 Toast.makeText(this,"Failed to Upload Image : $it",Toast.LENGTH_SHORT).show()
@@ -159,6 +160,7 @@ class RegisterDetailsActivity : AppCompatActivity() {
         username = usernameET.text.toString()
         email = emailET.text.toString()
         zipCode = zipCodeET.text.toString()
+        country = getDataFromPinCode(zipCode);
         address = addressET.text.toString()
 
         //realtime database
@@ -175,8 +177,18 @@ class RegisterDetailsActivity : AppCompatActivity() {
         tableRef.child("phone").setValue(currentUser.phoneNumber.toString())
         tableRef.child("uid").setValue(mAuth.currentUser?.uid!!)
         tableRef.child("registered").setValue("true")
+
+        Toast.makeText(this,"Successfully Registered! Plz login to Continue.", Toast.LENGTH_LONG).show()
+        mAuth.signOut()
+        val intent = Intent(this@RegisterDetailsActivity, LoginRegisterActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(intent)
+        finishAffinity()
     }
 
+    private fun getDataFromPinCode(zipCode: String):String? {
+        return country
+    }
 
     fun logout() {
         AlertDialog.Builder(this).apply {

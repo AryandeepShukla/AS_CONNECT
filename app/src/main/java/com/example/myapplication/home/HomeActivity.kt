@@ -7,6 +7,8 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
+import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 import com.example.myapplication.LoadingDialog
 import com.example.myapplication.LoginRegister.LoginRegisterActivity
 import com.example.myapplication.LoginRegister.RegisterDetailsActivity
@@ -25,15 +27,43 @@ class HomeActivity : AppCompatActivity() {
     lateinit var currentUser: FirebaseUser
     lateinit var databaseRef: FirebaseDatabase
     var phone: String? = null
-    var country: String? = null
 
-    lateinit var logout: ImageView
-    lateinit var profile: ImageView
     private var loadingDialog: LoadingDialog = LoadingDialog(this)
+    lateinit var meowNav : MeowBottomNavigation
+    private var prevFrag : Int? = 1
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        meowNav = findViewById(R.id.meowBottomNav)
+        meowNav.add(MeowBottomNavigation.Model(1, R.drawable.ic_baseline_home_black_24))
+        meowNav.add(MeowBottomNavigation.Model(2, R.drawable.user_group))
+        meowNav.add(MeowBottomNavigation.Model(3, R.drawable.ic_user_24))
+        meowNav.add(MeowBottomNavigation.Model(4, R.drawable.ic_logout_black_24))
+
+        meowNav.show(1, true)
+        replace(HomeFragment())
+        meowNav.setOnClickMenuListener {
+            when(it.id){
+                1 -> {
+                    prevFrag = 1
+                    replace(HomeFragment())
+                }
+                2 -> {
+                    prevFrag = 2
+                    replace(GroupFragment())
+                }
+                3 -> {
+                    prevFrag = 3
+                    replace(UserFragment())
+                }
+                4 -> {
+                    logout()
+                }
+            }
+        }
 
         //auth user
         mAuth = FirebaseAuth.getInstance()
@@ -45,20 +75,15 @@ class HomeActivity : AppCompatActivity() {
         getIfRegistered()
         loadingDialog.dismissDialog()
 
-        if (intent!=null){
-            country = intent.getStringExtra("country")
-        }
+    }
 
-        logout = findViewById(R.id.logoutHome)
-        profile = findViewById(R.id.profile)
-        logout.setOnClickListener {
-            logout()
-        }
-        profile.setOnClickListener {
-            startActivity(Intent(this@HomeActivity, UserProfileActivity::class.java))
-            finish()
-        }
-
+    // Extension function to replace fragment
+    fun replace(fragment:Fragment){
+        val fragmentManager = supportFragmentManager
+        val transaction = fragmentManager.beginTransaction()
+        transaction.replace(R.id.home_frame,fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
     }
 
     fun logout() {
@@ -76,7 +101,7 @@ class HomeActivity : AppCompatActivity() {
             }
 
             setNegativeButton("No") { _, _ ->
-                // if user press no, then return the activity
+                meowNav.show(prevFrag!!, true)
             }
             setCancelable(true)
         }.create().show()
@@ -94,7 +119,7 @@ class HomeActivity : AppCompatActivity() {
             }
 
             setNegativeButton("No") { _, _ ->
-                // if user press no, then return the activity
+
             }
             setCancelable(true)
         }.create().show()
@@ -116,7 +141,7 @@ class HomeActivity : AppCompatActivity() {
             if (!isRegistered){
                 loadingDialog.dismissDialog()
                 val intent = Intent(this@HomeActivity, RegisterDetailsActivity::class.java)
-                intent.putExtra("country", country)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
                 finish()
             }

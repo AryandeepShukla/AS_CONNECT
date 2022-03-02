@@ -2,6 +2,8 @@
 <resources>
     <color name="opaque_80_percent">#80FFFFFF</color>
     <color name="prime_col">#0a0837</color>
+    <color name="prime_col_50">#800A0837</color>
+    <color name="prime_col_8">#140A0837</color>
     <color name="yellow">#FFFF00</color>
     <color name="fuchsia">#FF00FF</color>
     <color name="red">#FF0000</color>

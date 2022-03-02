@@ -1,12 +1,12 @@
 package com.example.myapplication.LoginRegister
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.widget.addTextChangedListener
 import com.example.myapplication.LoadingDialog
@@ -14,7 +14,6 @@ import com.example.myapplication.R
 import com.example.myapplication.home.HomeActivity
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.*
-import com.google.firebase.database.FirebaseDatabase
 import com.hbb20.CountryCodePicker
 import java.util.concurrent.TimeUnit
 
@@ -25,6 +24,7 @@ class LoginRegisterActivity : AppCompatActivity() {
     private lateinit var phoneNumber: String
     lateinit var loadingDialog: LoadingDialog
     private var country: String? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +52,7 @@ class LoginRegisterActivity : AppCompatActivity() {
         }
 
     }
+
 
     private fun sendVerificationCode(phoneNumber: String) {
         val options = PhoneAuthOptions.newBuilder(mAuth!!)

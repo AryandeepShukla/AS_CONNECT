@@ -67,4 +67,6 @@ dependencies {
     implementation("androidx.viewpager2:viewpager2:1.0.0")
     implementation 'com.hbb20:ccp:2.5.1'
     implementation 'com.github.mukeshsolanki:android-otpview-pinview:2.1.2'
+    implementation 'com.android.volley:volley:1.2.1'
+    implementation 'com.etebarian:meow-bottom-navigation:1.2.0'
 }

@@ -10,12 +10,13 @@
     app:cardUseCompatPadding="true"
     card_view:cardCornerRAdius="5dp">
     <LinearLayout
+        android:background="@color/prime_col_8"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
             android:orientation="horizontal"
-            android:padding="3dp"
+            android:padding="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <ImageView

@@ -26,7 +26,6 @@ class VerifyActivity : AppCompatActivity() {
 
     var token: String? = null
     private var phoneNumber: String? = null
-    private var country: String? = null
     private var verifiedLayout: LinearLayout? = null
     private lateinit var loadingDialog: LoadingDialog
 
@@ -40,7 +39,6 @@ class VerifyActivity : AppCompatActivity() {
 
         token = intent.getStringExtra("code")
         phoneNumber = intent.getStringExtra("pno")
-        country = intent.getStringExtra("country")
 
         val pnoView: TextView = findViewById(R.id.otp_pno)
         val otpInput: EditText = findViewById(R.id.otp_view)
@@ -109,7 +107,6 @@ class VerifyActivity : AppCompatActivity() {
             .addOnCompleteListener {
                 if (it.isSuccessful) {
                     val intent = Intent(this@VerifyActivity, HomeActivity::class.java)
-                    intent.putExtra("country", country)
                     loadingDialog.dismissDialog()
                     verifiedLayout!!.visibility = View.VISIBLE
                     Handler(Looper.myLooper()!!).postDelayed({
