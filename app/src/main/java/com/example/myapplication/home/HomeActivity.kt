@@ -28,7 +28,7 @@ class HomeActivity : AppCompatActivity() {
     lateinit var databaseRef: FirebaseDatabase
     var phone: String? = null
 
-    private var loadingDialog: LoadingDialog = LoadingDialog(this)
+    lateinit var loadingDialog: LoadingDialog
     lateinit var meowNav : MeowBottomNavigation
     private var prevFrag : Int? = 1
 
@@ -36,6 +36,8 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        loadingDialog = LoadingDialog(this)
 
         meowNav = findViewById(R.id.meowBottomNav)
         meowNav.add(MeowBottomNavigation.Model(1, R.drawable.ic_baseline_home_black_24))
@@ -70,10 +72,6 @@ class HomeActivity : AppCompatActivity() {
         currentUser = mAuth.currentUser!!
         phone = mAuth.currentUser!!.phoneNumber.toString()
         databaseRef = FirebaseDatabase.getInstance()
-
-        //check if user is registered or not
-        getIfRegistered()
-        loadingDialog.dismissDialog()
 
     }
 
@@ -125,27 +123,5 @@ class HomeActivity : AppCompatActivity() {
         }.create().show()
     }
 
-
-    private fun getIfRegistered(){
-        loadingDialog.startDialog()
-        var isRegistered: Boolean = false
-        val ref = databaseRef.reference.child("profile")
-        ref.child(currentUser.phoneNumber.toString()).get().addOnSuccessListener {
-            if (it.exists()) {
-                loadingDialog.dismissDialog()
-                isRegistered = it.child("registered").value.toString().toBoolean()
-            } else {
-                loadingDialog.dismissDialog()
-                isRegistered =false
-            }
-            if (!isRegistered){
-                loadingDialog.dismissDialog()
-                val intent = Intent(this@HomeActivity, RegisterDetailsActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                startActivity(intent)
-                finish()
-            }
-        }
-    }
 }
 

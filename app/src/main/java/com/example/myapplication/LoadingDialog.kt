@@ -5,7 +5,7 @@ import android.app.AlertDialog
 import com.example.myapplication.R
 
 class LoadingDialog(var activity: Activity) {
-    private lateinit var dialog: AlertDialog
+    lateinit var dialog: AlertDialog
 
     fun startDialog(){
         val builder = AlertDialog.Builder(activity)

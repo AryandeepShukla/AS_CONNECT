@@ -23,8 +23,6 @@ class LoginRegisterActivity : AppCompatActivity() {
 
     private lateinit var phoneNumber: String
     lateinit var loadingDialog: LoadingDialog
-    private var country: String? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +44,6 @@ class LoginRegisterActivity : AppCompatActivity() {
 
         sendBtn.setOnClickListener {
             loadingDialog.startDialog()
-            country = ccp.selectedCountryName
             phoneNumber = ccp.selectedCountryCodeWithPlus + pno.text.toString()
             sendVerificationCode(phoneNumber)
         }
@@ -72,7 +69,6 @@ class LoginRegisterActivity : AppCompatActivity() {
                 val intent = Intent(this@LoginRegisterActivity, VerifyActivity::class.java)
                 intent.putExtra("code", p0)
                 intent.putExtra("pno", phoneNumber)
-                intent.putExtra("country", country)
                 loadingDialog.dismissDialog()
                 startActivity(intent)
             }

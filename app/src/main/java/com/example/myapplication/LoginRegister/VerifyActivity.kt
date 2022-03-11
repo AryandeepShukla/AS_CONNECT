@@ -106,13 +106,21 @@ class VerifyActivity : AppCompatActivity() {
         mAuth.signInWithCredential(credentials)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    val intent = Intent(this@VerifyActivity, HomeActivity::class.java)
-                    loadingDialog.dismissDialog()
                     verifiedLayout!!.visibility = View.VISIBLE
-                    Handler(Looper.myLooper()!!).postDelayed({
-                        startActivity(intent)
-                        finish()
-                    }, 2000)
+                    databaseRef.reference.child("profile").child(mAuth.currentUser!!.phoneNumber.toString()).get().addOnSuccessListener {ds->
+                        if (!ds.exists()) {
+                            loadingDialog.dismissDialog()
+                            startActivity(Intent(this@VerifyActivity, RegisterDetailsActivity::class.java))
+                            finishAffinity()
+                            Toast.makeText(this,"Register to continue",Toast.LENGTH_SHORT).show()
+                        }else{
+                            loadingDialog.dismissDialog()
+                            startActivity(Intent(this@VerifyActivity, HomeActivity::class.java))
+                            finishAffinity()
+                            Toast.makeText(this,"Successfully Logged in!",Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    loadingDialog.dismissDialog()
                 } else {
                     //show error
                     loadingDialog.dismissDialog()
@@ -120,6 +128,7 @@ class VerifyActivity : AppCompatActivity() {
                 }
             }
     }
+
 
     //onBackPressed
     override fun onBackPressed() {

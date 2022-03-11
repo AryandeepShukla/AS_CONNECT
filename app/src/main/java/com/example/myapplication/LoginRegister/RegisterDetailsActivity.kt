@@ -55,7 +55,6 @@ class RegisterDetailsActivity : AppCompatActivity() {
     lateinit var email : String
     lateinit var zipCode : String
     lateinit var address : String
-    private var country : String? = null
     lateinit var image : ImageView
     lateinit var imgUploadButton : Button
     lateinit var continueButton : Button
@@ -108,9 +107,6 @@ class RegisterDetailsActivity : AppCompatActivity() {
             loadingDialog.startDialog()
             try {
                 uploadProfilePic()
-                Handler(Looper.myLooper()!!).postDelayed({
-                    loadingDialog.dismissDialog()
-                },3000)
             }
             catch (e:Exception){
                 loadingDialog.dismissDialog()
@@ -146,9 +142,11 @@ class RegisterDetailsActivity : AppCompatActivity() {
                 val downloadUrl : Uri = urlTask.result
                 imageUrl = downloadUrl.toString()
                 Log.e("ImageUrl : ", imageUrl.toString())
+                Toast.makeText(this,"Profile Uploaded",Toast.LENGTH_SHORT).show()
                 registerEntries()
             }
             .addOnFailureListener {
+                loadingDialog.dismissDialog()
                 Toast.makeText(this,"Failed to Upload Image : $it",Toast.LENGTH_SHORT).show()
             }
     }
@@ -160,7 +158,6 @@ class RegisterDetailsActivity : AppCompatActivity() {
         username = usernameET.text.toString()
         email = emailET.text.toString()
         zipCode = zipCodeET.text.toString()
-        country = getDataFromPinCode(zipCode);
         address = addressET.text.toString()
 
         //realtime database
@@ -173,21 +170,17 @@ class RegisterDetailsActivity : AppCompatActivity() {
         tableRef.child("email").setValue(email)
         tableRef.child("zip_code").setValue(zipCode)
         tableRef.child("address").setValue(address)
-        tableRef.child("country").setValue(country)
         tableRef.child("phone").setValue(currentUser.phoneNumber.toString())
         tableRef.child("uid").setValue(mAuth.currentUser?.uid!!)
         tableRef.child("registered").setValue("true")
 
-        Toast.makeText(this,"Successfully Registered! Plz login to Continue.", Toast.LENGTH_LONG).show()
-        mAuth.signOut()
-        val intent = Intent(this@RegisterDetailsActivity, LoginRegisterActivity::class.java)
+        Toast.makeText(this,"Successfully Registered!", Toast.LENGTH_LONG).show()
+
+        val intent = Intent(this@RegisterDetailsActivity, HomeActivity::class.java)
+        loadingDialog.dismissDialog()
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
         finishAffinity()
-    }
-
-    private fun getDataFromPinCode(zipCode: String):String? {
-        return country
     }
 
     fun logout() {
