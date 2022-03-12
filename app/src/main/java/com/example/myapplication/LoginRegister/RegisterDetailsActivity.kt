@@ -17,12 +17,14 @@ import com.example.myapplication.LoadingDialog
 import com.example.myapplication.R
 import com.example.myapplication.home.HomeActivity
 import com.example.myapplication.home.UserFragment
+import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_register_details.*
 
 
@@ -36,6 +38,7 @@ class RegisterDetailsActivity : AppCompatActivity() {
     lateinit var storageReference: StorageReference
     private lateinit var imageUri : Uri
     private var imageUrl : String? = null
+    lateinit var downloadUrl : String
 
     //upper views
     lateinit var phoneNumber : TextView
@@ -104,14 +107,20 @@ class RegisterDetailsActivity : AppCompatActivity() {
         }
 
         continueButton.setOnClickListener {
-            loadingDialog.startDialog()
-            try {
-                uploadProfilePic()
+            if(!::downloadUrl.isInitialized){
+                Toast.makeText(this,"DP can't be empty", Toast.LENGTH_SHORT).show()
             }
-            catch (e:Exception){
-                loadingDialog.dismissDialog()
-                Toast.makeText(this, "Error Occurred : $e", Toast.LENGTH_LONG).show()
+            else{
+                loadingDialog.startDialog()
+                try {
+                    registerEntries()
+                }
+                catch (e:Exception){
+                    loadingDialog.dismissDialog()
+                    Toast.makeText(this, "Error Occurred : $e", Toast.LENGTH_LONG).show()
+                }
             }
+
         }
     }
 
@@ -127,28 +136,32 @@ class RegisterDetailsActivity : AppCompatActivity() {
         if(requestCode == 100 && resultCode == RESULT_OK && data != null){
             imageUri = data.data!!
             image.setImageURI(imageUri)
+            uploadProfilePic()
         }
     }
 
     fun uploadProfilePic(){
+        loadingDialog.startDialog()
+        continueButton.isEnabled = false
         val randomName : String = currentUser.phoneNumber.toString()
         val riversRef: StorageReference = storageReference.child("images/$randomName")
-        riversRef.putFile(imageUri)
-            .addOnSuccessListener {
-                image.setImageURI(null)
-                // Get a URL to the uploaded content
-                val urlTask : Task<Uri> = it.storage.downloadUrl
-                while (!urlTask.isSuccessful);
-                val downloadUrl : Uri = urlTask.result
-                imageUrl = downloadUrl.toString()
-                Log.e("ImageUrl : ", imageUrl.toString())
-                Toast.makeText(this,"Profile Uploaded",Toast.LENGTH_SHORT).show()
-                registerEntries()
+
+        var uploadTask = riversRef.putFile(imageUri)
+        uploadTask.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>>{task ->
+            if(!task.isSuccessful){
+                Log.e("Error uplaoding image: ", task.exception.toString())
+                Toast.makeText(this,"Failed to Upload Image!",Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener {
-                loadingDialog.dismissDialog()
-                Toast.makeText(this,"Failed to Upload Image : $it",Toast.LENGTH_SHORT).show()
+            return@Continuation riversRef.downloadUrl
+        }).addOnCompleteListener { task ->
+            continueButton.isEnabled = true
+            if(task.isSuccessful){
+                downloadUrl = task.result.toString()
             }
+            Log.e("ImageUrl : ", downloadUrl.toString())
+            Toast.makeText(this,"DP Uploaded",Toast.LENGTH_SHORT).show()
+        }
+        loadingDialog.dismissDialog()
     }
 
     fun registerEntries(){
@@ -164,7 +177,7 @@ class RegisterDetailsActivity : AppCompatActivity() {
         val ref = databaseRef.reference.child("profile")
         val tableRef = ref.child(currentUser.phoneNumber.toString())
         tableRef.child("first_name").setValue(firstName)
-        tableRef.child("profile_pic_url").setValue(imageUrl)
+        tableRef.child("profile_pic_url").setValue(downloadUrl)
         tableRef.child("last_name").setValue(lastName)
         tableRef.child("username").setValue(username)
         tableRef.child("email").setValue(email)
@@ -174,12 +187,9 @@ class RegisterDetailsActivity : AppCompatActivity() {
         tableRef.child("uid").setValue(mAuth.currentUser?.uid!!)
         tableRef.child("registered").setValue("true")
 
-        Toast.makeText(this,"Successfully Registered!", Toast.LENGTH_LONG).show()
-
-        val intent = Intent(this@RegisterDetailsActivity, HomeActivity::class.java)
         loadingDialog.dismissDialog()
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        startActivity(intent)
+        Toast.makeText(this,"Successfully Registered!", Toast.LENGTH_LONG).show()
+        startActivity(Intent(this@RegisterDetailsActivity, HomeActivity::class.java))
         finishAffinity()
     }
 

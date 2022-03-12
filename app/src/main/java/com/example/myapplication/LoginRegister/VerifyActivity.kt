@@ -107,18 +107,16 @@ class VerifyActivity : AppCompatActivity() {
             .addOnCompleteListener {
                 if (it.isSuccessful) {
                     verifiedLayout!!.visibility = View.VISIBLE
-                    databaseRef.reference.child("profile").child(mAuth.currentUser!!.phoneNumber.toString()).get().addOnSuccessListener {ds->
-                        if (!ds.exists()) {
-                            loadingDialog.dismissDialog()
-                            startActivity(Intent(this@VerifyActivity, RegisterDetailsActivity::class.java))
-                            finishAffinity()
-                            Toast.makeText(this,"Register to continue",Toast.LENGTH_SHORT).show()
-                        }else{
-                            loadingDialog.dismissDialog()
-                            startActivity(Intent(this@VerifyActivity, HomeActivity::class.java))
-                            finishAffinity()
-                            Toast.makeText(this,"Successfully Logged in!",Toast.LENGTH_SHORT).show()
-                        }
+                    if(it.result?.additionalUserInfo?.isNewUser == true){
+                        loadingDialog.dismissDialog()
+                        startActivity(Intent(this@VerifyActivity, RegisterDetailsActivity::class.java))
+                        finishAffinity()
+                        Toast.makeText(this,"Register to continue",Toast.LENGTH_SHORT).show()
+                    }else{
+                        loadingDialog.dismissDialog()
+                        startActivity(Intent(this@VerifyActivity, HomeActivity::class.java))
+                        finishAffinity()
+                        Toast.makeText(this,"Successfully Logged in!",Toast.LENGTH_SHORT).show()
                     }
                     loadingDialog.dismissDialog()
                 } else {
