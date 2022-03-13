@@ -1,5 +1,6 @@
 package com.example.myapplication.LoginRegister
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -203,6 +204,8 @@ class RegisterDetailsActivity : AppCompatActivity() {
                 loadingDialog.startDialog()
 
                 // if user press yes, then finish the current activity
+                val sharedPref = context.getSharedPreferences("curUser", Context.MODE_PRIVATE)
+                sharedPref.edit().clear().apply()
                 mAuth.signOut()
                 loadingDialog.dismissDialog()
                 val intent = Intent(this@RegisterDetailsActivity, LoginRegisterActivity::class.java)

@@ -116,7 +116,6 @@ class VerifyActivity : AppCompatActivity() {
                         loadingDialog.dismissDialog()
                         startActivity(Intent(this@VerifyActivity, HomeActivity::class.java))
                         finishAffinity()
-                        Toast.makeText(this,"Successfully Logged in!",Toast.LENGTH_SHORT).show()
                     }
                     loadingDialog.dismissDialog()
                 } else {
@@ -126,7 +125,6 @@ class VerifyActivity : AppCompatActivity() {
                 }
             }
     }
-
 
     //onBackPressed
     override fun onBackPressed() {

@@ -87,7 +87,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:padding="5dp">
 
                 <TextView
@@ -95,10 +95,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Hitech City MMts Station Park"
+                    android:text="000000"
                     android:textColor="@color/black"
                     android:textSize="17sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=", "
+                    android:textColor="@color/black"
+                    android:textSize="17sp"
+                    android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/addressProfile"
@@ -106,10 +114,9 @@
                     android:layout_height="wrap_content"
                     android:text="Bhagyanager Colony"
                     android:textAlignment="textStart"
-                    android:textColor="#ED5E5E5E"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
-                    android:padding="5dp"
+                    android:textColor="@color/black"
+                    android:textSize="17sp"
+                    android:textStyle="bold|italic"
                     card_view:ignore="RtlCompat" />
             </LinearLayout>
 

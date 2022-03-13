@@ -1,9 +1,11 @@
 package com.example.myapplication.home
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -53,7 +55,6 @@ class UserFragment : Fragment(R.layout.fragment_user) {
     lateinit var profilePic: ImageView
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -87,45 +88,19 @@ class UserFragment : Fragment(R.layout.fragment_user) {
         storageReference = storage.reference.child("images/${currentUser.phoneNumber.toString()}")
         setProfilePic()
 
-        //database for profile
-        databaseRef = FirebaseDatabase.getInstance()
-        val ref = databaseRef.reference.child("profile")
+        //setting up details
+        val sharedPref = requireActivity().applicationContext.getSharedPreferences("curUser", Context.MODE_PRIVATE)
+        pno.text = sharedPref.getString("sphone",null)
+        name.text = sharedPref.getString("fname",null)
+        username.text = sharedPref.getString("username","cant")
+        email.text = sharedPref.getString("email",null)
+        countryZipCode.text = sharedPref.getString("zipCode",null)
+        address.text = sharedPref.getString("address",null)
 
-        //fetching from realtime database
-        loadingDialog.startDialog()
-        val tableRef = ref.child(currentUser.phoneNumber.toString())
-        tableRef.addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-                loadingDialog.dismissDialog()
-                Toast.makeText(
-                    this@UserFragment.context,
-                    "Error occurred while fetching the details! ",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            override fun onDataChange(snapshot: DataSnapshot) {
-                //showing details in user profile
-                val spacedPhone = phone.substring(0, 3) + " " + phone.substring(3)
-                pno.text = spacedPhone
-
-                val fullName =
-                    snapshot.child("first_name").value.toString() + " " + snapshot.child("last_name").value.toString()
-                name.text = fullName
-
-                username.text = snapshot.child("username").value.toString()
-
-                email.text = snapshot.child("email").value.toString()
-
-                val countryPlusCode =
-                    snapshot.child("country").value.toString() + " (" + snapshot.child("zip_code").value.toString() + ")"
-                countryZipCode.text = countryPlusCode
-
-                address.text = snapshot.child("address").value.toString()
-                loadingDialog.dismissDialog()
-            }
-        })
+        Log.e("username : ", sharedPref.getString("username",null).toString())
 
     }
+
 
     private fun setProfilePic() {
         loadingDialog.startDialog()
