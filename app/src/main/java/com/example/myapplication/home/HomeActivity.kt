@@ -2,18 +2,19 @@ package com.example.myapplication.home
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 import com.example.myapplication.LoadingDialog
 import com.example.myapplication.LoginRegister.LoginRegisterActivity
-import com.example.myapplication.LoginRegister.RegisterDetailsActivity
 import com.example.myapplication.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -21,12 +22,18 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import java.io.ByteArrayOutputStream
+import java.io.File
 
 class HomeActivity : AppCompatActivity() {
 
     //auth
     lateinit var mAuth: FirebaseAuth
     lateinit var currentUser: FirebaseUser
+    lateinit var storage: FirebaseStorage
+    lateinit var storageReference: StorageReference
     var phone: String? = null
 
     lateinit var loadingDialog: LoadingDialog
@@ -40,6 +47,7 @@ class HomeActivity : AppCompatActivity() {
     var email: String? = null
     var zipCode: String? = null
     var address: String? = null
+    var picUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +87,8 @@ class HomeActivity : AppCompatActivity() {
         mAuth = FirebaseAuth.getInstance()
         currentUser = mAuth.currentUser!!
         phone = mAuth.currentUser!!.phoneNumber.toString()
+        storage = FirebaseStorage.getInstance()
+        storageReference = storage.reference.child("images/${currentUser.phoneNumber.toString()}")
 
         //fetch user details and save in shared preferences
         loadingDialog.startDialog()
@@ -114,6 +124,7 @@ class HomeActivity : AppCompatActivity() {
                     email = snapshot.child("email").value.toString()
                     zipCode = snapshot.child("zip_code").value.toString()
                     address = snapshot.child("address").value.toString()
+                    picUrl = snapshot.child("profile_pic_url").value.toString()
                     savedUserPref()
                     loadingDialog.dismissDialog()
                 }
@@ -122,7 +133,25 @@ class HomeActivity : AppCompatActivity() {
 
     }
 
+
     fun savedUserPref() {
+
+        //getting the bitmap of image
+        val localFile = File.createTempFile("images", "jpg")
+        storageReference.getFile(localFile).addOnSuccessListener {
+            //sharedpref for pic path
+            val imgSharedPref = getSharedPreferences("pic", Context.MODE_PRIVATE)
+            val pathEditor = imgSharedPref.edit()
+            pathEditor.apply {
+                putString("imgPath", localFile.absolutePath)
+                putBoolean("fetched", true)
+                apply()
+            }
+        }.addOnFailureListener {
+            Toast.makeText(this, "can't fetch DP!", Toast.LENGTH_LONG).show()
+        }
+
+        //details
         val sharedPref = getSharedPreferences("curUser", Context.MODE_PRIVATE)
         val editor = sharedPref.edit()
         editor.apply {
@@ -132,9 +161,16 @@ class HomeActivity : AppCompatActivity() {
             putString("email", email)
             putString("zipCode", zipCode)
             putString("address", address)
+            putString("picUrl", picUrl)
             putBoolean("fetched", true)
             apply()
         }
+    }
+
+    private fun userFetched(): Boolean {
+        val sharedPref = getSharedPreferences("curUser", Context.MODE_PRIVATE)
+        val imgSharedPref = getSharedPreferences("pic", Context.MODE_PRIVATE)
+        return sharedPref.getBoolean("fetched", false) and imgSharedPref.getBoolean("fetched", false)
     }
 
     // Extension function to replace fragment
@@ -146,10 +182,6 @@ class HomeActivity : AppCompatActivity() {
         transaction.commit()
     }
 
-    private fun userFetched(): Boolean {
-        val sharedPref = getSharedPreferences("curUser", Context.MODE_PRIVATE)
-        return sharedPref.getBoolean("fetched", false)
-    }
 
     fun logout() {
         AlertDialog.Builder(this).apply {
@@ -159,7 +191,10 @@ class HomeActivity : AppCompatActivity() {
             setPositiveButton("Yes") { _, _ ->
                 // if user press yes, then finish the current activity
                 val sharedPref = context.getSharedPreferences("curUser", Context.MODE_PRIVATE)
+                val imgSharedPref = context.getSharedPreferences("pic", Context.MODE_PRIVATE)
                 sharedPref.edit().clear().apply()
+                imgSharedPref.edit().clear().apply()
+                context.cacheDir.deleteRecursively()
                 mAuth.signOut()
                 val intent = Intent(this@HomeActivity, LoginRegisterActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP

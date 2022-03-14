@@ -2,9 +2,11 @@ package com.example.myapplication.home
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -34,18 +36,11 @@ class UserFragment : Fragment(R.layout.fragment_user) {
     private var _binding : FragmentUserBinding? = null
     private val binding get() = _binding!!
 
-    //auth
-    lateinit var mAuth: FirebaseAuth
-    lateinit var currentUser: FirebaseUser
-    lateinit var databaseRef: FirebaseDatabase
-    lateinit var storage: FirebaseStorage
-    lateinit var storageReference: StorageReference
 
     //top views
     lateinit var loadingDialog: LoadingDialog
 
-    //user details
-    lateinit var phone: String
+    //shared preferences user details
     lateinit var pno: TextView
     lateinit var name: TextView
     lateinit var username: TextView
@@ -53,6 +48,7 @@ class UserFragment : Fragment(R.layout.fragment_user) {
     lateinit var countryZipCode: TextView
     lateinit var address: TextView
     lateinit var profilePic: ImageView
+    lateinit var imgString: String
 
 
     override fun onCreateView(
@@ -69,6 +65,8 @@ class UserFragment : Fragment(R.layout.fragment_user) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        loadingDialog = LoadingDialog(this.requireActivity())
+
         profilePic = view.findViewById(R.id.imageProfile)
         pno = view.findViewById(R.id.phoneProfile)
         name = view.findViewById(R.id.nameProfile)
@@ -76,17 +74,6 @@ class UserFragment : Fragment(R.layout.fragment_user) {
         email = view.findViewById(R.id.emailProfile)
         countryZipCode = view.findViewById(R.id.countryZipCodeProfile)
         address = view.findViewById(R.id.addressProfile)
-
-        loadingDialog = LoadingDialog(this.requireActivity())
-
-        //auth user
-        mAuth = FirebaseAuth.getInstance()
-        currentUser = mAuth.currentUser!!
-        phone = mAuth.currentUser!!.phoneNumber.toString()
-
-        storage = FirebaseStorage.getInstance()
-        storageReference = storage.reference.child("images/${currentUser.phoneNumber.toString()}")
-        setProfilePic()
 
         //setting up details
         val sharedPref = requireActivity().applicationContext.getSharedPreferences("curUser", Context.MODE_PRIVATE)
@@ -97,28 +84,12 @@ class UserFragment : Fragment(R.layout.fragment_user) {
         countryZipCode.text = sharedPref.getString("zipCode",null)
         address.text = sharedPref.getString("address",null)
 
-        Log.e("username : ", sharedPref.getString("username",null).toString())
-
+        //setting up image
+        val imgSharedPref = requireActivity().applicationContext.getSharedPreferences("pic", Context.MODE_PRIVATE)
+        imgString = imgSharedPref.getString("imgPath", null).toString()
+        val bm = BitmapFactory.decodeFile(imgString)
+        profilePic.setImageBitmap(bm)
     }
-
-
-    private fun setProfilePic() {
-        loadingDialog.startDialog()
-        val localFile = File.createTempFile("tempFile", ".jpg");
-
-        storageReference.getFile(localFile).addOnSuccessListener {
-            val bitmap = BitmapFactory.decodeFile(localFile.absolutePath)
-            profilePic.setImageBitmap(bitmap)
-        }.addOnFailureListener {
-            Toast.makeText(
-                this.context,
-                "Error occurred while fetching the profile picture! ",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-        loadingDialog.dismissDialog()
-    }
-
 
     override fun onDestroy() {
         super.onDestroy()
