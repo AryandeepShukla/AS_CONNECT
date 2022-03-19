@@ -2,11 +2,7 @@ package com.example.myapplication.home
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Base64
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +12,7 @@ import com.etebarian.meowbottomnavigation.MeowBottomNavigation
 import com.example.myapplication.LoadingDialog
 import com.example.myapplication.LoginRegister.LoginRegisterActivity
 import com.example.myapplication.R
+import com.example.myapplication.home.messages.MessagesList
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -24,7 +21,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.io.ByteArrayOutputStream
 import java.io.File
 
 class HomeActivity : AppCompatActivity() {
@@ -48,6 +44,8 @@ class HomeActivity : AppCompatActivity() {
     var zipCode: String? = null
     var address: String? = null
     var picUrl: String? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +87,8 @@ class HomeActivity : AppCompatActivity() {
         phone = mAuth.currentUser!!.phoneNumber.toString()
         storage = FirebaseStorage.getInstance()
         storageReference = storage.reference.child("images/${currentUser.phoneNumber.toString()}")
+        val databaseRef = FirebaseDatabase.getInstance()
+        val ref = databaseRef.reference.child("profile")
 
         //fetch user details and save in shared preferences
         loadingDialog.startDialog()
@@ -100,14 +100,8 @@ class HomeActivity : AppCompatActivity() {
                 Toast.LENGTH_SHORT
             ).show()
         } else {
-            val databaseRef = FirebaseDatabase.getInstance()
-            val ref = databaseRef.reference.child("profile")
-            val currentUser = mAuth.currentUser
-            phone = currentUser!!.phoneNumber.toString()
-
             //fetching from realtime database
-            val tableRef = ref.child(phone!!)
-            tableRef.addValueEventListener(object : ValueEventListener {
+            ref.child(phone!!).addValueEventListener(object : ValueEventListener {
                 override fun onCancelled(error: DatabaseError) {
                     Toast.makeText(
                         this@HomeActivity,
@@ -131,6 +125,8 @@ class HomeActivity : AppCompatActivity() {
             })
         }
 
+
+
     }
 
 
@@ -150,7 +146,6 @@ class HomeActivity : AppCompatActivity() {
         }.addOnFailureListener {
             Toast.makeText(this, "can't fetch DP!", Toast.LENGTH_LONG).show()
         }
-
         //details
         val sharedPref = getSharedPreferences("curUser", Context.MODE_PRIVATE)
         val editor = sharedPref.edit()

@@ -59,13 +59,8 @@ class UserFragment : Fragment(R.layout.fragment_user) {
         _binding = FragmentUserBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         loadingDialog = LoadingDialog(this.requireActivity())
+        loadingDialog.startDialog()
 
         profilePic = view.findViewById(R.id.imageProfile)
         pno = view.findViewById(R.id.phoneProfile)
@@ -89,6 +84,16 @@ class UserFragment : Fragment(R.layout.fragment_user) {
         imgString = imgSharedPref.getString("imgPath", null).toString()
         val bm = BitmapFactory.decodeFile(imgString)
         profilePic.setImageBitmap(bm)
+
+        loadingDialog.dismissDialog()
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
     }
 
     override fun onDestroy() {
