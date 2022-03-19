@@ -125,8 +125,6 @@ class HomeActivity : AppCompatActivity() {
             })
         }
 
-
-
     }
 
 

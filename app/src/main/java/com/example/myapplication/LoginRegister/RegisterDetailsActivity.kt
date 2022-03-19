@@ -2,22 +2,19 @@ package com.example.myapplication.LoginRegister
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.myapplication.LoadingDialog
 import com.example.myapplication.R
 import com.example.myapplication.home.HomeActivity
-import com.example.myapplication.home.UserFragment
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
@@ -27,6 +24,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_register_details.*
+import java.io.ByteArrayOutputStream
 
 
 class RegisterDetailsActivity : AppCompatActivity() {
@@ -136,18 +134,22 @@ class RegisterDetailsActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == 100 && resultCode == RESULT_OK && data != null){
             imageUri = data.data!!
-            image.setImageURI(imageUri)
-            uploadProfilePic()
+            var original  = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
+            var baos  = ByteArrayOutputStream()
+            original.compress(Bitmap.CompressFormat.JPEG, 30, baos)
+            image.setImageBitmap(original)
+            var imgByte = baos.toByteArray()
+            uploadProfilePic(imgByte)
         }
     }
 
-    fun uploadProfilePic(){
+    fun uploadProfilePic(imgByte: ByteArray) {
         loadingDialog.startDialog()
         continueButton.isEnabled = false
         val randomName : String = currentUser.phoneNumber.toString()
         val riversRef: StorageReference = storageReference.child("images/$randomName")
 
-        var uploadTask = riversRef.putFile(imageUri)
+        var uploadTask = riversRef.putBytes(imgByte)
         uploadTask.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>>{task ->
             if(!task.isSuccessful){
                 Log.e("Error uplaoding image: ", task.exception.toString())
